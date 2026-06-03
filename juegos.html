@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TROLL GAMES — ¿Puedes pasar todos?</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a1a;
+    --surface: #12122a;
+    --card: #1a1a35;
+    --accent: #ff3cac;
+    --yellow: #ffd600;
+    --cyan: #00f5ff;
+    --green: #39ff14;
+    --orange: #ff6b00;
+    --purple: #9b59ff;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0ff;
+    --muted: #8888aa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* STARS BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 20% 40%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.3) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .logo {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(3rem, 8vw, 6rem);
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--yellow), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255,60,172,0.5));
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { filter: drop-shadow(0 0 30px rgba(255,60,172,0.5)); }
+    50% { filter: drop-shadow(0 0 60px rgba(0,245,255,0.8)); }
+  }
+  .subtitle {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--yellow);
+    margin-top: 0.3rem;
+    letter-spacing: 2px;
+  }
+
+  /* TROPHY BAR */
+  .trophy-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 1rem auto;
+    padding: 0.6rem 1.5rem;
+    background: rgba(255,214,0,0.08);
+    border: 1px solid rgba(255,214,0,0.25);
+    border-radius: 50px;
+    width: fit-content;
+    position: relative;
+    z-index: 1;
+  }
+  .trophy-count {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--yellow);
+  }
+  .trophy-icons { display: flex; gap: 4px; }
+  .trophy-slot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px dashed rgba(255,214,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.4s;
+  }
+  .trophy-slot.earned {
+    background: rgba(255,214,0,0.2);
+    border-style: solid;
+    border-color: var(--yellow);
+    animation: shine 1s ease-out;
+  }
+  @keyframes shine {
+    0% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  /* GAME GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.2rem;
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .game-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 16px;
+  }
+  .game-card:hover { transform: translateY(-4px) scale(1.02); }
+  .game-card:hover::before { opacity: 1; }
+  .card-blue::before { background: radial-gradient(circle at top, rgba(0,245,255,0.08), transparent 70%); }
+  .card-pink::before { background: radial-gradient(circle at top, rgba(255,60,172,0.08), transparent 70%); }
+  .card-green::before { background: radial-gradient(circle at top, rgba(57,255,20,0.08), transparent 70%); }
+  .card-yellow::before { background: radial-gradient(circle at top, rgba(255,214,0,0.08), transparent 70%); }
+  .card-purple::before { background: radial-gradient(circle at top, rgba(155,89,255,0.08), transparent 70%); }
+  .card-orange::before { background: radial-gradient(circle at top, rgba(255,107,0,0.08), transparent 70%); }
+  .card-blue:hover { border-color: var(--cyan); box-shadow: 0 8px 30px rgba(0,245,255,0.15); }
+  .card-pink:hover { border-color: var(--accent); box-shadow: 0 8px 30px rgba(255,60,172,0.15); }
+  .card-green:hover { border-color: var(--green); box-shadow: 0 8px 30px rgba(57,255,20,0.15); }
+  .card-yellow:hover { border-color: var(--yellow); box-shadow: 0 8px 30px rgba(255,214,0,0.15); }
+  .card-purple:hover { border-color: var(--purple); box-shadow: 0 8px 30px rgba(155,89,255,0.15); }
+  .card-orange:hover { border-color: var(--orange); box-shadow: 0 8px 30px rgba(255,107,0,0.15); }
+
+  .game-icon { font-size: 2.8rem; margin-bottom: 0.5rem; display: block; }
+  .game-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+  .game-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+  .badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .badge-hard { background: rgba(255,60,172,0.2); color: var(--accent); border: 1px solid rgba(255,60,172,0.4); }
+  .badge-trollface { background: rgba(255,214,0,0.15); color: var(--yellow); border: 1px solid rgba(255,214,0,0.4); }
+  .card-trophy {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    font-size: 1.1rem;
+    opacity: 0.2;
+    transition: opacity 0.3s;
+  }
+  .card-trophy.earned { opacity: 1; }
+
+  /* MODAL */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: min(95vw, 560px);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: rgba(255,60,172,0.2); }
+  .modal-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.3rem;
+    text-align: center;
+  }
+  .game-area {
+    background: #0d0d22;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    min-height: 280px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .btn {
+    display: inline-block;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    padding: 0.6rem 1.6rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: scale(0.97); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-yellow { background: var(--yellow); color: #111; }
+  .btn-cyan { background: var(--cyan); color: #111; }
+  .btn-green { background: var(--green); color: #111; }
+  .center { text-align: center; }
+  .msg {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    min-height: 1.4rem;
+    text-align: center;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Win overlay */
+  .win-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    border-radius: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 10;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .win-overlay.active { display: flex; }
+  .win-trophy { font-size: 4rem; animation: bounce 0.6s infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  .win-text {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    color: var(--yellow);
+    letter-spacing: 3px;
+    margin: 0.5rem 0;
+  }
+
+  /* ===== GAME-SPECIFIC STYLES ===== */
+
+  /* WHACK A MOLE */
+  .mole-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .hole {
+    background: #1a0a2e;
+    border-radius: 50%;
+    height: 70px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 2rem;
+    border: 2px solid #2a1a4e;
+    transition: transform 0.1s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .hole:active { transform: scale(0.93); }
+  .mole-emoji {
+    transition: transform 0.15s;
+    transform: translateY(100%);
+  }
+  .mole-emoji.up { transform: translateY(0); }
+
+  /* BUTTON CLICK */
+  .big-btn-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 220px;
+  }
+  .troll-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 1.5rem;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+    position: absolute;
+  }
+
+  /* MEMORY */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .mem-card {
+    height: 60px;
+    background: #1e1e40;
+    border: 1.5px solid #2e2e60;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    user-select: none;
+  }
+  .mem-card.flipped { background: #2a2a5a; }
+  .mem-card:hover { transform: scale(1.05); }
+  .mem-card.matched {
+    background: rgba(57,255,20,0.1);
+    border-color: var(--green);
+    cursor: default;
+  }
+
+  /* TYPING */
+  .type-target {
+    font-family: monospace;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--cyan);
+    min-height: 2rem;
+  }
+  .type-input {
+    width: 100%;
+    background: #0a0a20;
+    border: 1.5px solid #3a3a6a;
+    color: var(--text);
+    font-size: 1.2rem;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    text-align: center;
+    font-family: monospace;
+    letter-spacing: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .type-input:focus { border-color: var(--cyan); }
+
+  /* MAZE - canvas */
+  #maze-canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+    cursor: none;
+  }
+
+  /* REACTION */
+  .reaction-light {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background: #1a1a3a;
+    border: 3px solid #3a3a6a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .reaction-light.go { background: rgba(57,255,20,0.25); border-color: var(--green); }
+
+  /* QUIZ */
+  .quiz-q {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    color: var(--cyan);
+  }
+  .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quiz-opt {
+    background: #1a1a3a;
+    border: 1.5px solid #3a3a6a;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.7rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quiz-opt:hover { background: #25254a; border-color: var(--purple); }
+  .quiz-opt.correct { background: rgba(57,255,20,0.15); border-color: var(--green); color: var(--green); }
+  .quiz-opt.wrong { background: rgba(255,60,172,0.15); border-color: var(--accent); color: var(--accent); }
+  .quiz-progress { font-size: 0.8rem; color: var(--muted); text-align: right; margin-bottom: 0.5rem; }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 0.8rem;
+  }
+  .progress-bar {
+    flex: 1; height: 8px;
+    background: #1a1a3a;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 20px;
+    transition: width 0.3s;
+    background: var(--accent);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3a3a6a; border-radius: 10px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    position: relative;
+    z-index: 1;
+  }
+  footer span { color: var(--accent); }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--yellow);
+    color: #111;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    padding: 0.7rem 2rem;
+    border-radius: 50px;
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  .notif.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎮 TROLL GAMES</div>
+  <div class="subtitle">¿Crees que puedes ganar? 😈 — Intenta pasarlos todos</div>
+</header>
+
+<div class="trophy-bar">
+  <span>🏆</span>
+  <span class="trophy-count" id="trophyCount">0 / 6 trofeos</span>
+  <div class="trophy-icons" id="trophyIcons"></div>
+</div>
+
+<div class="grid">
+  <div class="game-card card-green" onclick="openGame('whack')">
+    <span class="badge badge-trollface">😈 TROLL</span>
+    <span class="game-icon">🔨</span>
+    <div class="game-title" style="color:#39ff14">¡Aplasta el Topo!</div>
+    <div class="game-desc">Golpea 10 topos… pero cuidado con el topo falso que sale siempre</div>
+    <div class="card-trophy" id="t-whack">🏆</div>
+  </div>
+  <div class="game-card card-pink" onclick="openGame('button')">
+    <span class="badge badge-hard">😤 IMPOSIBLE</span>
+    <span class="game-icon">🔴</span>
+    <div class="game-title" style="color:#ff3cac">¡NO Presiones el Botón!</div>
+    <div class="game-desc">El botón se mueve. Tienes 3 intentos. El juego te odia personalmente</div>
+    <div class="card-trophy" id="t-button">🏆</div>
+  </div>
+  <div class="game-card card-yellow" onclick="openGame('memory')">
+    <span class="badge badge-trollface">😈 TROLL</span>
+    <span class="game-icon">🃏</span>
+    <div class="game-title" style="color:#ffd600">Memoria Suprema</div>
+    <div class="game-desc">Encuentra los pares… pero las cartas se mezclan justo cuando crees que recordaste</div>
+    <div class="card-trophy" id="t-memory">🏆</div>
+  </div>
+  <div class="game-card card-blue" onclick="openGame('typing')">
+    <span class="badge badge-hard">😤 IMPOSIBLE</span>
+    <span class="game-icon">⌨️</span>
+    <div class="game-title" style="color:#00f5ff">Escribe Rápido</div>
+    <div class="game-desc">Escribe la palabra… que cambia cada vez que escribes una letra. Speedrun de frustración</div>
+    <div class="card-trophy" id="t-typing">🏆</div>
+  </div>
+  <div class="game-card card-orange" onclick="openGame('reaction')">
+    <span class="badge badge-trollface">😈 TROLL</span>
+    <span class="game-icon">⚡</span>
+    <div class="game-title" style="color:#ff6b00">Reacción Relámpago</div>
+    <div class="game-desc">Haz clic cuando la luz sea verde. Spoiler: la verde aparece una fracción de segundo</div>
+    <div class="card-trophy" id="t-reaction">🏆</div>
+  </div>
+  <div class="game-card card-purple" onclick="openGame('quiz')">
+    <span class="badge badge-hard">😤 IMPOSIBLE</span>
+    <span class="game-icon">🧠</span>
+    <div class="game-title" style="color:#9b59ff">Quiz del Diablo</div>
+    <div class="game-desc">Preguntas con trampas ridículas. Todas las respuestas parecen correctas. Solo 1 lo es</div>
+    <div class="card-trophy" id="t-quiz">🏆</div>
+  </div>
+</div>
+
+<footer>Hecho con 😈 por <span>Troll Games</span> — Si no has lanzado tu dispositivo todavía, no lo has intentado suficiente</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeGame()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div class="notif" id="notif"></div>
+
+<script>
+const trophies = {};
+const gameNames = { whack:'whack', button:'button', memory:'memory', typing:'typing', reaction:'reaction', quiz:'quiz' };
+const EMOJIS = ['🎭','🧨','💀','🌋','👹','👾'];
+
+function initTrophyBar() {
+  const el = document.getElementById('trophyIcons');
+  el.innerHTML = '';
+  const games = Object.keys(gameNames);
+  games.forEach(g => {
+    const s = document.createElement('div');
+    s.className = 'trophy-slot' + (trophies[g] ? ' earned' : '');
+    s.id = 'slot-' + g;
+    s.textContent = trophies[g] ? '🏆' : '';
+    el.appendChild(s);
+  });
+  const count = Object.values(trophies).filter(Boolean).length;
+  document.getElementById('trophyCount').textContent = count + ' / 6 trofeos';
+}
+initTrophyBar();
+
+function awardTrophy(game) {
+  if (trophies[game]) return;
+  trophies[game] = true;
+  document.getElementById('slot-' + game).className = 'trophy-slot earned';
+  document.getElementById('slot-' + game).textContent = '🏆';
+  const t = document.getElementById('t-' + game);
+  if (t) t.classList.add('earned');
+  const count = Object.values(trophies).filter(Boolean).length;
+  document.getElementById('trophyCount').textContent = count + ' / 6 trofeos';
+  showNotif('🏆 ¡Trofeo desbloqueado! ' + count + '/6');
+}
+
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2800);
+}
+
+function openGame(id) {
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('active');
+  const content = document.getElementById('modal-content');
+  if (id === 'whack') content.innerHTML = buildWhack();
+  else if (id === 'button') content.innerHTML = buildButton();
+  else if (id === 'memory') content.innerHTML = buildMemory();
+  else if (id === 'typing') content.innerHTML = buildTyping();
+  else if (id === 'reaction') content.innerHTML = buildReaction();
+  else if (id === 'quiz') content.innerHTML = buildQuiz();
+  overlay.dataset.game = id;
+  if (id === 'whack') initWhack();
+  else if (id === 'button') initButton();
+  else if (id === 'memory') initMemory();
+  else if (id === 'typing') initTyping();
+  else if (id === 'reaction') initReaction();
+  else if (id === 'quiz') initQuiz();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeGame();
+}
+function closeGame() {
+  clearAllTimers();
+  document.getElementById('overlay').classList.remove('active');
+  document.getElementById('modal-content').innerHTML = '';
+}
+
+let _timers = [];
+function safeTimeout(fn, ms) { const t = setTimeout(fn, ms); _timers.push(t); return t; }
+function safeInterval(fn, ms) { const t = setInterval(fn, ms); _timers.push(t); return t; }
+function clearAllTimers() { _timers.forEach(t => { clearTimeout(t); clearInterval(t); }); _timers = []; }
+
+// ===== WHACK A MOLE =====
+function buildWhack() {
+  return `
+  <div class="modal-title" style="color:#39ff14">🔨 ¡Aplasta el Topo!</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-family:'Fredoka One',cursive;font-size:1rem">Puntos: <b id="w-score">0</b> / 10</span>
+    <span style="font-family:'Fredoka One',cursive;font-size:1rem">Tiempo: <b id="w-time">20</b>s</span>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="w-prog" style="width:100%;background:var(--green)"></div></div></div>
+  <div class="game-area">
+    <div class="mole-grid" id="mole-grid">
+      ${Array.from({length:9},(_,i)=>`<div class="hole" id="hole${i}" onclick="whackMole(${i})"><span class="mole-emoji" id="mole${i}">🐹</span></div>`).join('')}
+    </div>
+    <div class="win-overlay" id="w-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡APLASTASTE TODO!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">¡Trofeo desbloqueado!</div>
+      <button class="btn btn-green" onclick="closeGame()">Cerrar</button>
+    </div>
+    <div class="win-overlay" id="w-lose">
+      <div style="font-size:3rem">😭</div>
+      <div class="win-text" style="color:var(--accent)">¡TIEMPO!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">¿Y si practicas más?</div>
+      <button class="btn btn-accent" onclick="openGame('whack')">Reintentar</button>
+    </div>
+  </div>
+  <div class="msg" id="w-msg">Aplasta al topo 🐹 — ¡Pero no al falso! 😈</div>`;
+}
+
+let whackScore = 0, whackTime = 20, whackInterval, whackActive = false;
+let whackTrollIndex = -1;
+
+function initWhack() {
+  whackScore = 0; whackTime = 20;
+  document.getElementById('w-score').textContent = '0';
+  document.getElementById('w-time').textContent = '20';
+  document.getElementById('w-prog').style.width = '100%';
+  whackTrollIndex = Math.floor(Math.random() * 9);
+  document.getElementById(`mole${whackTrollIndex}`).textContent = '😈';
+  whackActive = true;
+  safeInterval(() => {
+    if (!whackActive) return;
+    whackTime--;
+    document.getElementById('w-time').textContent = whackTime;
+    document.getElementById('w-prog').style.width = (whackTime / 20 * 100) + '%';
+    if (whackTime <= 0) {
+      whackActive = false;
+      clearAllTimers();
+      document.getElementById('w-lose').classList.add('active');
+    }
+  }, 1000);
+  spawnMole();
+}
+
+function spawnMole() {
+  if (!whackActive) return;
+  // Hide all
+  for (let i = 0; i < 9; i++) {
+    const m = document.getElementById(`mole${i}`);
+    if (m) { m.classList.remove('up'); }
+  }
+  const idx = Math.floor(Math.random() * 9);
+  const m = document.getElementById(`mole${idx}`);
+  if (m) m.classList.add('up');
+  safeTimeout(() => {
+    if (m) m.classList.remove('up');
+    safeTimeout(spawnMole, Math.random() * 300 + 200);
+  }, 800);
+}
+
+function whackMole(i) {
+  if (!whackActive) return;
+  if (i === whackTrollIndex) {
+    // TROLL: el troll topo te quita puntos
+    whackScore = Math.max(0, whackScore - 2);
+    document.getElementById('w-score').textContent = whackScore;
+    document.getElementById('w-msg').textContent = '😈 ¡Era el topo falso! -2 puntos jajaja';
+    document.getElementById(`mole${i}`).classList.remove('up');
+    return;
+  }
+  const m = document.getElementById(`mole${i}`);
+  if (m && m.classList.contains('up')) {
+    m.classList.remove('up');
+    whackScore++;
+    document.getElementById('w-score').textContent = whackScore;
+    document.getElementById('w-msg').textContent = '¡Buen golpe! 🔨';
+    if (whackScore >= 10) {
+      whackActive = false;
+      clearAllTimers();
+      document.getElementById('w-win').classList.add('active');
+      awardTrophy('whack');
+    }
+  }
+}
+
+// ===== NO PRESIONES EL BOTÓN =====
+function buildButton() {
+  return `
+  <div class="modal-title" style="color:var(--accent)">🔴 ¡NO Presiones el Botón!</div>
+  <div style="text-align:center;margin-bottom:8px;font-family:'Fredoka One',cursive">
+    Intentos: <span id="btn-tries">3</span> | Presionado: <span id="btn-pressed">0</span> veces
+  </div>
+  <div class="game-area" id="btn-area" style="min-height:250px;overflow:hidden;position:relative">
+    <button class="troll-btn btn-accent" id="troll-btn-el" onclick="pressedButton()" style="font-family:'Bangers',cursive">¡PRESIÉNAME!</button>
+    <div class="win-overlay" id="btn-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡RESISTISTE!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">Trofeo desbloqueado! Eres de hierro</div>
+      <button class="btn btn-green" onclick="closeGame()">Cerrar</button>
+    </div>
+    <div class="win-overlay" id="btn-lose">
+      <div style="font-size:3rem">😂</div>
+      <div class="win-text" style="color:var(--accent)">¡LO PRESIONASTE!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">No podías resistirte, ¿verdad?</div>
+      <button class="btn btn-accent" onclick="openGame('button')">Llorar e intentar de nuevo</button>
+    </div>
+  </div>
+  <div class="msg" id="btn-msg">Mantén el cursor alejado del botón por 10 segundos</div>
+  <div class="center" style="margin-top:0.5rem">
+    <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="btn-prog" style="width:0%;background:var(--green)"></div></div></div>
+    <span style="font-size:0.8rem;color:var(--muted)" id="btn-timer">0 / 10s alejado</span>
+  </div>`;
+}
+
+let btnTries = 3, btnPresses = 0, btnSurviveTime = 0, btnInterval, btnWon = false;
+
+function initButton() {
+  btnTries = 3; btnPresses = 0; btnSurviveTime = 0; btnWon = false;
+  document.getElementById('btn-tries').textContent = btnTries;
+  document.getElementById('btn-pressed').textContent = '0';
+  repositionButton();
+  safeInterval(() => {
+    if (btnWon) return;
+    btnSurviveTime += 0.1;
+    const p = Math.min(btnSurviveTime / 10 * 100, 100);
+    const el = document.getElementById('btn-prog');
+    const tel = document.getElementById('btn-timer');
+    if (el) el.style.width = p + '%';
+    if (tel) tel.textContent = btnSurviveTime.toFixed(1) + ' / 10s alejado';
+    if (btnSurviveTime >= 10 && !btnWon) {
+      btnWon = true;
+      clearAllTimers();
+      document.getElementById('btn-win').classList.add('active');
+      awardTrophy('button');
+    }
+  }, 100);
+
+  // Button moves on mouseover area
+  const area = document.getElementById('btn-area');
+  if (area) {
+    area.addEventListener('mousemove', (e) => {
+      if (btnWon) return;
+      const btn = document.getElementById('troll-btn-el');
+      if (!btn) return;
+      const r = area.getBoundingClientRect();
+      const bx = e.clientX - r.left;
+      const by = e.clientY - r.top;
+      const bw = btn.offsetWidth, bh = btn.offsetHeight;
+      const bl = parseInt(btn.style.left) || 100;
+      const bt = parseInt(btn.style.top) || 80;
+      const dist = Math.hypot(bx - bl - bw/2, by - bt - bh/2);
+      if (dist < 80) {
+        btnSurviveTime = 0;
+        repositionButton(bl, bt);
+        const msg = document.getElementById('btn-msg');
+        if (msg) msg.textContent = ['😈 ¡Casi!', '🤣 ¡No tan rápido!', '😏 Creías que sí...', '🏃 ¡Soy más rápido!'][Math.floor(Math.random()*4)];
+      }
+    });
+  }
+}
+
+function repositionButton(avoidX, avoidY) {
+  const btn = document.getElementById('troll-btn-el');
+  const area = document.getElementById('btn-area');
+  if (!btn || !area) return;
+  const w = area.offsetWidth - 160;
+  const h = area.offsetHeight - 60;
+  let x, y, tries = 0;
+  do {
+    x = Math.random() * w + 20;
+    y = Math.random() * h + 20;
+    tries++;
+  } while (avoidX && tries < 20 && Math.hypot(x - avoidX, y - avoidY) < 120);
+  btn.style.left = x + 'px';
+  btn.style.top = y + 'px';
+}
+
+function pressedButton() {
+  if (btnWon) return;
+  btnPresses++;
+  btnTries--;
+  btnSurviveTime = 0;
+  document.getElementById('btn-tries').textContent = btnTries;
+  document.getElementById('btn-pressed').textContent = btnPresses;
+  repositionButton();
+  if (btnTries <= 0) {
+    clearAllTimers();
+    document.getElementById('btn-lose').classList.add('active');
+  } else {
+    const msg = document.getElementById('btn-msg');
+    if (msg) msg.textContent = ['😂 ¡No pudiste evitarlo!', '🤭 ¡Otra vez!', '😈 Solo te quedan ' + btnTries + ' intentos'][Math.min(btnPresses-1, 2)];
+  }
+}
+
+// ===== MEMORIA TROLL =====
+const memEmojis = ['🎮','👾','🕹️','💣','🎯','🎲','🧨','🃏'];
+let memCards = [], memFlipped = [], memMatched = 0, memLocked = false;
+let memShuffleCount = 0;
+
+function buildMemory() {
+  return `
+  <div class="modal-title" style="color:var(--yellow)">🃏 Memoria Suprema</div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-family:'Fredoka One',cursive">
+    <span>Pares: <b id="mem-pairs">0</b>/8</span>
+    <span>Mezcladas: <b id="mem-shuffles">0</b> veces 😈</span>
+  </div>
+  <div class="game-area">
+    <div class="memory-grid" id="mem-grid"></div>
+    <div class="win-overlay" id="mem-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡MEMORIA DE DIOS!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">¡Trofeo desbloqueado!</div>
+      <button class="btn btn-yellow" onclick="closeGame()">Cerrar</button>
+    </div>
+  </div>
+  <div class="msg" id="mem-msg">Encuentra todos los pares... si puedes 😏</div>`;
+}
+
+function initMemory() {
+  memMatched = 0; memShuffleCount = 0; memFlipped = []; memLocked = false;
+  memCards = [...memEmojis, ...memEmojis].map((e,i) => ({id:i, emoji:e, matched:false, flipped:false}));
+  shuffle(memCards);
+  renderMemory();
+}
+
+function renderMemory() {
+  const g = document.getElementById('mem-grid');
+  if (!g) return;
+  g.innerHTML = memCards.map((c,i) => `
+    <div class="mem-card${c.flipped||c.matched?' flipped':''} ${c.matched?'matched':''}" 
+    id="mc${i}" onclick="flipMem(${i})">
+      ${c.flipped||c.matched ? c.emoji : '❓'}
+    </div>`).join('');
+}
+
+function flipMem(i) {
+  if (memLocked || memCards[i].matched || memCards[i].flipped) return;
+  memCards[i].flipped = true;
+  memFlipped.push(i);
+  renderMemory();
+  if (memFlipped.length === 2) {
+    memLocked = true;
+    const [a,b] = memFlipped;
+    if (memCards[a].emoji === memCards[b].emoji) {
+      memCards[a].matched = memCards[b].matched = true;
+      memCards[a].flipped = memCards[b].flipped = false;
+      memMatched++;
+      document.getElementById('mem-pairs').textContent = memMatched;
+      memFlipped = []; memLocked = false;
+      renderMemory();
+      if (memMatched === 8) {
+        safeTimeout(() => {
+          document.getElementById('mem-win').classList.add('active');
+          awardTrophy('memory');
+        }, 300);
+      } else if (memMatched % 2 === 0 && memMatched > 0) {
+        // TROLL: every 2 pairs shuffle the unmatched ones
+        safeTimeout(() => {
+          trollShuffle();
+        }, 400);
+      }
+    } else {
+      safeTimeout(() => {
+        memCards[a].flipped = memCards[b].flipped = false;
+        memFlipped = []; memLocked = false;
+        renderMemory();
+      }, 700);
+    }
+  }
+}
+
+function trollShuffle() {
+  const unmatched = memCards.filter(c => !c.matched);
+  // Shuffle positions of unmatched cards
+  const idxs = [];
+  memCards.forEach((c,i) => { if (!c.matched) idxs.push(i); });
+  const emojis = idxs.map(i => memCards[i].emoji);
+  shuffle(emojis);
+  idxs.forEach((idx, j) => { memCards[idx].emoji = emojis[j]; });
+  memShuffleCount++;
+  document.getElementById('mem-shuffles').textContent = memShuffleCount;
+  document.getElementById('mem-msg').textContent = '😈 ¡Las mezclé mientras no miraba!';
+  renderMemory();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ===== TYPING TROLL =====
+const wordList = ['TROLL','FÁCIL','RÁPIDO','JUEGO','DIABLO','CURSOR','TECLAS','GANAR'];
+let typingWord = '', typingProgress = 0, typingAttempts = 0, typingChanges = 0;
+
+function buildTyping() {
+  return `
+  <div class="modal-title" style="color:var(--cyan)">⌨️ Escribe Rápido</div>
+  <div style="text-align:center;margin-bottom:8px;font-family:'Fredoka One',cursive">
+    Palabras completadas: <b id="tp-done">0</b>/5 | Cambios: <b id="tp-changes">0</b>😈
+  </div>
+  <div class="game-area">
+    <div style="text-align:center;padding-top:0.5rem">
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem">Escribe esta palabra exactamente:</div>
+      <div class="type-target" id="type-word">CARGANDO</div>
+      <input class="type-input" id="type-input" placeholder="Escribe aquí..." autocomplete="off" maxlength="10" oninput="checkTyping(this.value)">
+      <div style="margin-top:0.8rem;font-size:0.85rem;color:var(--muted)">Escribe <b>5</b> palabras para ganar</div>
+    </div>
+    <div class="win-overlay" id="tp-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡VELOCIDAD PURA!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">¡Trofeo desbloqueado!</div>
+      <button class="btn btn-cyan" onclick="closeGame()">Cerrar</button>
+    </div>
+  </div>
+  <div class="msg" id="tp-msg">La palabra cambia cuando escribes... mucho 😈</div>`;
+}
+
+function initTyping() {
+  typingProgress = 0; typingAttempts = 0; typingChanges = 0;
+  document.getElementById('tp-done').textContent = '0';
+  document.getElementById('tp-changes').textContent = '0';
+  newTypingWord();
+  const inp = document.getElementById('type-input');
+  if (inp) inp.focus();
+}
+
+function newTypingWord() {
+  typingWord = wordList[Math.floor(Math.random() * wordList.length)];
+  const el = document.getElementById('type-word');
+  if (el) el.textContent = typingWord;
+  const inp = document.getElementById('type-input');
+  if (inp) inp.value = '';
+}
+
+function checkTyping(val) {
+  const upper = val.toUpperCase();
+  // TROLL: after 3 chars, change the word sometimes
+  if (upper.length >= 3 && Math.random() < 0.35) {
+    let newWord;
+    do { newWord = wordList[Math.floor(Math.random() * wordList.length)]; } while (newWord === typingWord);
+    typingWord = newWord;
+    const el = document.getElementById('type-word');
+    if (el) el.textContent = typingWord;
+    typingChanges++;
+    document.getElementById('tp-changes').textContent = typingChanges;
+    const msg = document.getElementById('tp-msg');
+    if (msg) msg.textContent = ['😈 ¡Cambié la palabra!', '🤣 Muy lento!', '😏 ¿Ya la olvidaste?'][Math.floor(Math.random()*3)];
+    const inp = document.getElementById('type-input');
+    if (inp) inp.value = '';
+    return;
+  }
+  if (upper === typingWord) {
+    typingProgress++;
+    document.getElementById('tp-done').textContent = typingProgress;
+    const msg = document.getElementById('tp-msg');
+    if (msg) msg.textContent = '✅ ¡Bien! ' + (5 - typingProgress) + ' más...';
+    if (typingProgress >= 5) {
+      safeTimeout(() => {
+        document.getElementById('tp-win').classList.add('active');
+        awardTrophy('typing');
+      }, 200);
+    } else {
+      safeTimeout(newTypingWord, 300);
+    }
+  }
+}
+
+// ===== REACTION =====
+let reactionState = 'wait', reactionGood = 0, reactionNeeded = 3, reactionTimer;
+
+function buildReaction() {
+  return `
+  <div class="modal-title" style="color:var(--orange)">⚡ Reacción Relámpago</div>
+  <div style="text-align:center;margin-bottom:8px;font-family:'Fredoka One',cursive">
+    Aciertos: <b id="rx-score">0</b>/${reactionNeeded} | Fallos: <b id="rx-fail">0</b>
+  </div>
+  <div class="game-area">
+    <div style="text-align:center;padding-top:0.5rem">
+      <div class="reaction-light" id="rx-light">⏳</div>
+      <div style="font-size:0.9rem;color:var(--muted);margin-bottom:1rem">Haz clic solo cuando sea 🟢</div>
+      <button class="btn btn-yellow" id="rx-btn" onclick="reactionClick()">¡CLIC!</button>
+    </div>
+    <div class="win-overlay" id="rx-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡REFLEJOS DE GATO!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">¡Trofeo desbloqueado!</div>
+      <button class="btn btn-green" onclick="closeGame()">Cerrar</button>
+    </div>
+    <div class="win-overlay" id="rx-lose">
+      <div style="font-size:3rem">😵</div>
+      <div class="win-text" style="color:var(--accent)">¡DEMASIADO TARDE!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">Tus reflejos son de tortuga</div>
+      <button class="btn btn-accent" onclick="openGame('reaction')">Volver a intentar</button>
+    </div>
+  </div>
+  <div class="msg" id="rx-msg">Espera el verde... si es que aparece 😏</div>`;
+}
+
+let rxFails = 0, rxActive = false;
+function initReaction() {
+  reactionGood = 0; rxFails = 0; rxActive = false;
+  document.getElementById('rx-score').textContent = '0';
+  document.getElementById('rx-fail').textContent = '0';
+  scheduleReaction();
+}
+
+function scheduleReaction() {
+  const light = document.getElementById('rx-light');
+  if (!light) return;
+  light.className = 'reaction-light';
+  light.textContent = '⏳';
+  const msg = document.getElementById('rx-msg');
+  if (msg) msg.textContent = 'Espera...';
+  const delay = Math.random() * 3000 + 1000;
+  rxActive = false;
+  reactionTimer = safeTimeout(() => {
+    if (!document.getElementById('rx-light')) return;
+    // TROLL: sometimes flash red/yellow first
+    const troll = Math.random() < 0.45;
+    if (troll) {
+      const lel = document.getElementById('rx-light');
+      if (lel) { lel.textContent = '🟡'; }
+      safeTimeout(() => {
+        const lel2 = document.getElementById('rx-light');
+        if (!lel2) return;
+        lel2.textContent = '🟢';
+        lel2.classList.add('go');
+        rxActive = true;
+        if (msg) msg.textContent = '¡AHORA!';
+        safeTimeout(() => {
+          if (rxActive) {
+            rxActive = false;
+            rxFails++;
+            const f = document.getElementById('rx-fail');
+            if (f) f.textContent = rxFails;
+            const l = document.getElementById('rx-light');
+            if (l) { l.className = 'reaction-light'; l.textContent = '⏳'; }
+            if (rxFails >= 3) {
+              document.getElementById('rx-lose').classList.add('active');
+            } else {
+              if (msg) msg.textContent = '😈 ¡Muy lento! Fallo ' + rxFails + '/3';
+              scheduleReaction();
+            }
+          }
+        }, 500);
+      }, 300 + Math.random()*200);
+    } else {
+      const lel = document.getElementById('rx-light');
+      if (lel) { lel.textContent = '🟢'; lel.classList.add('go'); }
+      rxActive = true;
+      if (msg) msg.textContent = '¡AHORA!';
+      safeTimeout(() => {
+        if (rxActive) {
+          rxActive = false;
+          rxFails++;
+          const f = document.getElementById('rx-fail');
+          if (f) f.textContent = rxFails;
+          const l = document.getElementById('rx-light');
+          if (l) { l.className = 'reaction-light'; l.textContent = '⏳'; }
+          if (rxFails >= 3) {
+            document.getElementById('rx-lose').classList.add('active');
+          } else {
+            if (msg) msg.textContent = '😈 ¡Muy lento! Fallo ' + rxFails + '/3';
+            scheduleReaction();
+          }
+        }
+      }, 500);
+    }
+  }, delay);
+}
+
+function reactionClick() {
+  if (rxActive) {
+    rxActive = false;
+    reactionGood++;
+    document.getElementById('rx-score').textContent = reactionGood;
+    const light = document.getElementById('rx-light');
+    if (light) { light.className = 'reaction-light'; light.textContent = '✅'; }
+    const msg = document.getElementById('rx-msg');
+    if (msg) msg.textContent = '¡Bien! ' + (reactionNeeded - reactionGood) + ' más';
+    if (reactionGood >= reactionNeeded) {
+      safeTimeout(() => {
+        document.getElementById('rx-win').classList.add('active');
+        awardTrophy('reaction');
+      }, 300);
+    } else {
+      safeTimeout(scheduleReaction, 600);
+    }
+  } else {
+    // Clicked too early!
+    rxFails++;
+    document.getElementById('rx-fail').textContent = rxFails;
+    const msg = document.getElementById('rx-msg');
+    if (msg) msg.textContent = '😂 ¡Muy ansioso! Todavía era ' + (document.getElementById('rx-light')?.textContent || '⏳');
+    if (rxFails >= 3) {
+      clearAllTimers();
+      document.getElementById('rx-lose').classList.add('active');
+    }
+  }
+}
+
+// ===== QUIZ TROLL =====
+const quizData = [
+  {
+    q: "¿Cuántos huevos hay en una docena de huevos?",
+    opts: ["12", "11", "13", "Una docena"],
+    answer: 3,
+    troll: "¡La pregunta dice 'docena de huevos', la respuesta correcta es 'una docena'! 🥚"
+  },
+  {
+    q: "Un tren sale a las 3:00 PM y llega 2 horas y 30 minutos después. ¿A qué hora llega?",
+    opts: ["5:30 PM", "5:00 PM", "6:00 PM", "5:30 AM"],
+    answer: 0,
+    troll: "5:30 PM es correcto, ¿no? ¡Esta sí era normal! 😄"
+  },
+  {
+    q: "¿Cuál es la capital de Colombia?",
+    opts: ["Medellín", "Cali", "Bogotá", "Cartagena"],
+    answer: 2,
+    troll: "¡Bogotá, la capital de Colombia! ¡Fácil!"
+  },
+  {
+    q: "Si tienes 3 manzanas y me das 2, ¿cuántas manzanas TIENES?",
+    opts: ["1", "5", "3", "2"],
+    answer: 2,
+    troll: "La pregunta dice ¿cuántas TIENES? (antes de dármelas). ¡Todavía tenías 3! 😈"
+  },
+  {
+    q: "¿Qué es más pesado: 1 kg de plumas o 1 kg de oro?",
+    opts: ["Las plumas", "El oro", "Pesan igual", "Depende del país"],
+    answer: 2,
+    troll: "¡Los dos pesan 1 KG! ¡El clásico! 😂"
+  },
+  {
+    q: "Si hoy es martes y ayer era lunes, ¿qué día es mañana?",
+    opts: ["Jueves", "Miércoles", "Martes", "Lunes"],
+    answer: 1,
+    troll: "¡Miércoles! Simple lógica 😄"
+  },
+  {
+    q: "¿Cuántos meses del año tienen 28 días?",
+    opts: ["1 (febrero)", "Ninguno", "Todos", "Solo los bisiestos"],
+    answer: 2,
+    troll: "¡TODOS los meses tienen al menos 28 días! No solo febrero 😈"
+  }
+];
+
+let quizIdx = 0, quizScore = 0, quizAnswered = false;
+
+function buildQuiz() {
+  return `
+  <div class="modal-title" style="color:var(--purple)">🧠 Quiz del Diablo</div>
+  <div class="game-area">
+    <div class="quiz-progress" id="qz-prog">Pregunta 1/${quizData.length}</div>
+    <div class="quiz-q" id="qz-q">Cargando...</div>
+    <div class="quiz-opts" id="qz-opts"></div>
+    <div class="win-overlay" id="qz-win">
+      <div class="win-trophy">🏆</div>
+      <div class="win-text">¡MENTE MAESTRA!</div>
+      <div style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem" id="qz-final"></div>
+      <button class="btn btn-yellow" onclick="closeGame()">Cerrar</button>
+    </div>
+  </div>
+  <div class="msg" id="qz-msg">Lee con atención... o no, como quieras 😏</div>
+  <div class="center" style="margin-top:0.5rem">
+    <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="qz-bar" style="width:0%;background:var(--purple)"></div></div></div>
+  </div>`;
+}
+
+function initQuiz() {
+  quizIdx = 0; quizScore = 0; quizAnswered = false;
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const q = quizData[quizIdx];
+  if (!q) return;
+  document.getElementById('qz-prog').textContent = `Pregunta ${quizIdx+1}/${quizData.length}`;
+  document.getElementById('qz-q').textContent = q.q;
+  document.getElementById('qz-bar').style.width = (quizIdx / quizData.length * 100) + '%';
+  quizAnswered = false;
+  const opts = document.getElementById('qz-opts');
+  opts.innerHTML = q.opts.map((o,i) => `<button class="quiz-opt" onclick="answerQuiz(${i})">${o}</button>`).join('');
+}
+
+function answerQuiz(i) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = quizData[quizIdx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts[i].classList.add(i === q.answer ? 'correct' : 'wrong');
+  if (i === q.answer) {
+    opts[q.answer].classList.add('correct');
+    quizScore++;
+    document.getElementById('qz-msg').textContent = '✅ ' + q.troll;
+  } else {
+    opts[q.answer].classList.add('correct');
+    document.getElementById('qz-msg').textContent = '❌ ' + q.troll;
+  }
+  safeTimeout(() => {
+    quizIdx++;
+    if (quizIdx >= quizData.length) {
+      document.getElementById('qz-bar').style.width = '100%';
+      document.getElementById('qz-final').textContent = `Puntuación: ${quizScore}/${quizData.length}`;
+      document.getElementById('qz-win').classList.add('active');
+      awardTrophy('quiz');
+    } else {
+      renderQuiz();
+    }
+  }, 1600);
+}
+</script>
+</body>
+</html>
